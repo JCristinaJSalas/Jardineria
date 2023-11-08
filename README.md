@@ -56,7 +56,7 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
     FROM cliente
     JOIN empleado ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
     JOIN oficina ON empleado.codigo_oficina = oficina.codigo_oficina
-    WHERE c.ciudad = 'Fuenlabrada';
+    WHERE cliente.ciudad = 'Fuenlabrada';
     ```
 
 7. Devuelve el nombre de los clientes y el nombre de sus representantes junto con la ciudad de la oficina a la que pertenece el representante.
@@ -70,25 +70,21 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
 8. Devuelve un listado con el nombre de los empleados junto con el nombre de sus jefes.
 
     ```SQL
-    SELECT empleado.nombre AS nombre_empleado, empleado2.nombre AS nombre_jefe FROM empleado
-    LEFT JOIN empleado e2 ON empleado.codigo_jefe = empleado2.codigo_empleado;
+    Select empleado.nombre, ejefe.nombre as jefe from empleado join empleado ejefe on empleado.codigo_jefe = ejefe.codigo_empleado;
     ```
 
 9. Devuelve un listado que muestre el nombre de cada empleado, el nombre de su jefe y el nombre del jefe de sus jefe.
 
     ```SQL
-    SELECT empleado.nombre AS nombre_empleado, empleado2.nombre AS nombre_jefe, empleado3.nombre AS nombre_jefe_mayor
-    FROM empleado 
-    LEFT JOIN empleado  ON empleado.codigo_jefe = empleado2.codigo_empleado
-    LEFT JOIN empleado  ON empleado2.codigo_jefe = empleado3.codigo_empleado;
+        Select empleado.nombre, ejefe.nombre as jefe, superj.nombre as Superjefe from empleado join empleado ejefe on empleado.codigo_jefe = ejefe.codigo_empleado join emplead
     ```
 
 10. Devuelve el nombre de los clientes a los que no se les ha entregado a tiempo un pedido.
 
     ```SQL
-    SELECT DISTINCT nombre_cliente FROM cliente
-    JOIN pedido ON cliente.codigo_cliente = pago.codigo_cliente
-    WHERE fecha_entrega > fecha_esperada;
+    SELECT nombre_cliente, pedido.estado  FROM cliente
+    JOIN pedido ON cliente.codigo_cliente = pedido.codigo_cliente
+    WHERE fecha_entrega > fecha_esperada OR fecha_entrega IS NULL;
     ```
 
 11. Devuelve un listado de las diferentes gamas de producto que ha comprado cada cliente.
@@ -103,3 +99,59 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
     GROUP BY cliente.codigo_cliente
     ORDER BY cliente.codigo_cliente;
     ```
+
+### 1.4.6 Consultas multitabla (Composición externa) 
+Resuelva todas las consultas utilizando las cláusulas LEFT JOIN, RIGHT JOIN, NATURAL LEFT JOIN y NATURAL RIGHT D0IN 
+
+1. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago. 
+    ```SQL
+    SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante FROM cliente
+    LEFT JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
+    WHERE pago.codigo_cliente IS NULL;
+    ```
+
+2. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pedido. 
+```SQL
+select distinct cliente.codigo_cliente as Cliente from pedido right join cliente on pedido.codigo_cliente = cliente.codigo_cliente  WHERE pedido.codigo_cliente IS NULL;
+   ```
+
+
+3. Devuelve un listado que muestre los clientes que no han realizado ningún pago y los que no han realizado ningún pedido. 
+
+```SQL
+select distinct cliente.nombre_cliente from cliente left join pedido on cliente.codigo_cliente = pedido.codigo_cliente left join pago on cliente.codigo_cliente = pago.codigo_cliente where pedido.codigo_cliente is null and pago.codigo_cliente is null;
+   ```
+
+
+4. Devuelve un listado que muestre solamente los empleados que no tienen una oficina asociada. 
+
+```SQL
+select * from empleado where codigo_oficina is null;
+   ```
+
+
+
+5. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado. 
+
+
+```SQL
+
+
+
+   ```
+
+
+6. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado junto con los datos de la oficina donde trabajan. 
+
+7. Devuelve un listado que muestre los empleados que no tienen una oficina asociada y los que no tienen un cliente asociado 
+
+8. Devuelve un listado de los productos que nunca han aparecido en un pedido. 
+
+
+9. Devuelve un listado de los productos que nunca han aparecido en un pedido. El resultado debe mostrar el nombre, la descripción y la imagen del producto 
+
+10. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama Frutales. 
+
+11. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado ningún pago. 
+
+12. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el nombre de su jefe asociado.
