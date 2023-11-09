@@ -5,47 +5,50 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
 1. Obtén un listado con el nombre de cada cliente y el nombre y apellido de su representante de ventas.
 
    ```SQL
-   SELECT cliente.nombre_cliente as Nombre_Cliente,
-   CONCAT(empleado.nombre,' ',empleado.apellido1,' ',empleado.apellido2)
-   AS Nombre_Representante_Ventas
-   FROM cliente
-   JOIN empleado ON c.codigo_empleado_rep_ventas = empleado.codigo_empleado;
+   select c.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1) as rep_ventas from cliente c
+   join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado;
    ```
 
 2. Muestra el nombre de los clientes que hayan realizado pagos junto con el nombre de sus representantes de ventas.
 
    ```SQL
-   SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante FROM cliente
-   JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
-   JOIN empleado ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado;
+   select c.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1) as rep_ventas, p.id_transaccion from cliente c
+   join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
+   join pago p on c.codigo_cliente = p.codigo_cliente
+   where id_transaccion is not null
+   group by c.nombre_cliente;
    ```
 
 3. Muestra el nombre de los clientes que no hayan realizado pagos junto con el nombre de sus representantes de ventas.
 
    ```SQL
-   SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante FROM cliente
-   LEFT JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
-   JOIN empleado ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
-   WHERE pago.codigo_cliente IS NULL;
+    select c.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1) as rep_ventas, p.id_transaccion from cliente c
+    join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
+    join pago p on c.codigo_cliente = p.codigo_cliente
+    where id_transaccion is null
+    group by c.nombre_cliente;
    ```
 
 4. Devuelve el nombre de los clientes que han hecho pagos y el nombre de sus representantes junto con la ciudad de la oficina a la que pertenece el representante.
 
    ```SQL
-   SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante, oficina.ciudad FROM cliente
-   JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
-   JOIN empleado ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
-   JOIN oficina ON empleado.codigo_oficina = oficina.codigo_oficina;
+   select c.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1) as rep_ventas, o.ciudad from cliente c
+   join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
+   join pago p on c.codigo_cliente = p.codigo_cliente
+   join oficina o on e.codigo_oficina = o.codigo_oficina
+   where id_transaccion is not null
+   group by c.nombre_cliente;
    ```
 
 5. Devuelve el nombre de los clientes que no hayan hecho pagos y el nombre de sus representantes junto con la ciudad de la oficina a la que pertenece el representante.
 
    ```SQL
-   SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante, oficina.ciudad FROM cliente
-   LEFT JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
-   JOIN empleado ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
-   JOIN oficina ON empleado.codigo_oficina = oficina.codigo_oficina
-   WHERE pago.codigo_cliente IS NULL;
+   select c.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1) as rep_ventas, o.ciudad from cliente c
+   join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
+   join pago p on c.codigo_cliente = p.codigo_cliente
+   join oficina o on e.codigo_oficina = o.codigo_oficina
+   where id_transaccion is null
+   group by c.nombre_cliente;
    ```
 
 6. Lista la dirección de las oficinas que tengan clientes en `Fuenlabrada`.
@@ -62,9 +65,11 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
 7. Devuelve el nombre de los clientes y el nombre de sus representantes junto con la ciudad de la oficina a la que pertenece el representante.
 
    ```SQL
-   SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante, oficina.ciudad FROM cliente
-   JOIN empleado ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
-   JOIN oficina ON empleado.codigo_oficina = oficina.codigo_oficina;
+   select c.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1) as rep_ventas, o.ciudad from cliente c
+   join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
+   join pago p on c.codigo_cliente = p.codigo_cliente
+   join oficina o on e.codigo_oficina = o.codigo_oficina
+   group by c.nombre_cliente;
    ```
 
 8. Devuelve un listado con el nombre de los empleados junto con el nombre de sus jefes.
@@ -76,7 +81,9 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
 9. Devuelve un listado que muestre el nombre de cada empleado, el nombre de su jefe y el nombre del jefe de sus jefe.
 
    ```SQL
-       Select empleado.nombre, ejefe.nombre as jefe, superj.nombre as Superjefe from empleado join empleado ejefe on empleado.codigo_jefe = ejefe.codigo_empleado join emplead
+    Select empleado.nombre, ejefe.nombre as jefe, sjefe.nombre as super_jefe from empleado
+    join empleado ejefe on empleado.codigo_jefe = ejefe.codigo_empleado
+    join empleado sjefe on ejefe.codigo_jefe = sjefe.codigo_empleado;
    ```
 
 10. Devuelve el nombre de los clientes a los que no se les ha entregado a tiempo un pedido.
@@ -107,7 +114,7 @@ Resuelva todas las consultas utilizando las cláusulas LEFT JOIN, RIGHT JOIN, NA
 1. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
 
    ```SQL
-   SELECT DISTINCT cliente.nombre_cliente, empleado.nombre AS nombre_representante FROM cliente
+   SELECT DISTINCT cliente.nombre_cliente FROM cliente
    LEFT JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
    WHERE pago.codigo_cliente IS NULL;
    ```
@@ -115,13 +122,18 @@ Resuelva todas las consultas utilizando las cláusulas LEFT JOIN, RIGHT JOIN, NA
 2. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pedido.
 
 ```SQL
-select distinct cliente.codigo_cliente as Cliente from pedido right join cliente on pedido.codigo_cliente = cliente.codigo_cliente  WHERE pedido.codigo_cliente IS NULL;
+   select distinct cliente.codigo_cliente as id, cliente.nombre_cliente as Cliente from pedido
+   right join cliente on pedido.codigo_cliente = cliente.codigo_cliente
+   WHERE pedido.codigo_cliente IS NULL;
 ```
 
 3. Devuelve un listado que muestre los clientes que no han realizado ningún pago y los que no han realizado ningún pedido.
 
 ```SQL
-select distinct cliente.nombre_cliente from cliente left join pedido on cliente.codigo_cliente = pedido.codigo_cliente left join pago on cliente.codigo_cliente = pago.codigo_cliente where pedido.codigo_cliente is null and pago.codigo_cliente is null;
+select distinct cliente.codigo_cliente as id, cliente.nombre_cliente as Cliente from pedido
+right join cliente on pedido.codigo_cliente = cliente.codigo_cliente
+LEFT JOIN pago ON cliente.codigo_cliente = pago.codigo_cliente
+WHERE pago.codigo_cliente IS NULL AND pedido.codigo_cliente IS NULL;
 ```
 
 4. Devuelve un listado que muestre solamente los empleados que no tienen una oficina asociada.
@@ -134,7 +146,7 @@ select * from empleado where codigo_oficina is null;
 
 ```SQL
 
-SELECT cliente.nombre_cliente as Cliente, empleado.nombre FROM cliente
+SELECT empleado.nombre FROM cliente
 RIGHT JOIN empleado
 ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
 WHERE cliente.nombre_cliente IS NULL;
@@ -144,7 +156,7 @@ WHERE cliente.nombre_cliente IS NULL;
 6. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado junto con los datos de la oficina donde trabajan.
 
 ```SQL
-    SELECT cliente.nombre_cliente as Cliente, empleado.nombre, oficina.* FROM cliente
+    SELECT empleado.nombre, oficina.* FROM cliente
     RIGHT JOIN empleado
     ON cliente.codigo_empleado_rep_ventas = empleado.codigo_empleado
     inner JOIN oficina
@@ -167,28 +179,35 @@ WHERE empleado.codigo_oficina IS NULL;
 8. Devuelve un listado de los productos que nunca han aparecido en un pedido.
 
 ```SQL
-SELECT codigo_pedido, producto.nombre FROM detalle_pedido
-RIGHT JOIN producto
-ON detalle_pedido.codigo_producto = producto.codigo_producto
-WHERE codigo_pedido IS NULL
-GROUP BY producto.nombre;
+SELECT p.*, dp.codigo_producto FROM producto p
+LEFT JOIN detalle_pedido dp ON p.codigo_producto = dp.codigo_producto
+WHERE dp.codigo_producto IS NULL;
 
 ```
 
 9.  Devuelve un listado de los productos que nunca han aparecido en un pedido. El resultado debe mostrar el nombre, la descripción y la imagen del producto
 
 ```SQL
-
-SELECT codigo_pedido, producto.nombre, producto.descripcion  FROM detalle_pedido
-RIGHT JOIN producto
-ON detalle_pedido.codigo_producto = producto.codigo_producto
-WHERE codigo_pedido IS NULL
-GROUP BY producto.nombre;
+SELECT p.nombre, p.descripcion, gp.imagen FROM producto p
+LEFT JOIN detalle_pedido dp ON p.codigo_producto = dp.codigo_producto
+JOIN gama_producto gp ON p.gama = gp.gama
+WHERE dp.codigo_producto IS NULL;
 ```
 
 10. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama Frutales.
 
 ```SQL
+SELECT DISTINCT o.*
+FROM oficina o
+WHERE o.codigo_oficina NOT IN (
+    SELECT DISTINCT e.codigo_oficina
+    FROM empleado e
+    JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas
+    JOIN pedido pe ON c.codigo_cliente = pe.codigo_cliente
+    JOIN detalle_pedido dp ON pe.codigo_pedido = dp.codigo_pedido
+    JOIN producto p ON dp.codigo_producto = p.codigo_producto
+    WHERE p.gama = 'Frutales'
+);
 
 
 ```
@@ -197,18 +216,21 @@ GROUP BY producto.nombre;
 
 ```SQL
 
-SELECT pedido.codigo_pedido as pedido, cliente.nombre_cliente as cliente, pago.forma_pago from pedido
-join cliente
-on pedido.codigo_cliente = cliente.codigo_cliente
-join pago
-on pago.codigo_cliente = cliente.codigo_cliente
-where pago.forma_pago IS NULL
-ORDER BY pedido.codigo_pedido;
+SELECT DISTINCT c.nombre_cliente, p.codigo_cliente, pg.codigo_cliente FROM cliente c
+INNER JOIN pedido p ON c.codigo_cliente = p.codigo_cliente
+LEFT JOIN  pago pg ON c.codigo_cliente = pg.codigo_cliente
+WHERE p.codigo_cliente IS NOT NULL AND pg.codigo_cliente IS NULL;
+
 ```
 
 12. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el nombre de su jefe asociado.
 
 ```SQL
+
+SELECT e.nombre as empleado, c.nombre_cliente, em.nombre as jefe from empleado e
+left JOIN cliente c on e.codigo_empleado = c.codigo_empleado_rep_ventas
+JOIN empleado em ON e.codigo_jefe = em.codigo_empleado
+WHERE nombre_cliente IS NULL;
 
 
 ```
