@@ -57,6 +57,7 @@ CREATE TABLE cliente (
   CONSTRAINT pk_cliente_codigo_empleado_rep_ventas FOREIGN KEY (codigo_empleado_rep_ventas) REFERENCES empleado (codigo_empleado)
 );
 
+
 CREATE TABLE pedido (
   codigo_pedido INTEGER NOT NULL,
   fecha_pedido date NOT NULL,
