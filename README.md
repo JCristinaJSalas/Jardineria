@@ -238,7 +238,7 @@ WHERE nombre_cliente IS NULL;
 1. Devuelve un listado con el código de oficina y la ciudad donde hay oficinas.
 
    ```SQL
-   SELECT codigo_oficina, ciudad FROM oficina;
+   SELECT codigo_oficina, ciudad FROM oficina where ciudad is not null;
    ```
 
 2. Devuelve un listado con la ciudad y el teléfono de las oficinas de España.
@@ -257,20 +257,20 @@ WHERE nombre_cliente IS NULL;
 4. Devuelve el nombre del puesto, nombre, apellidos y email del jefe de la empresa.
 
    ```SQL
-   SELECT nombre, CONCAT(apellido1, " ", apellido2) , email, puesto FROM empleado WHERE codigo_jefe IS NULL;
+   SELECT nombre, CONCAT(apellido1, " ", apellido2) as apellidos, email, puesto FROM empleado WHERE codigo_jefe IS NULL;
    ```
 
 5. Devuelve un listado con el nombre, apellidos y puesto de aquellos empleados que no sean representantes de ventas.
 
    ```SQL
-   SELECT nombre, CONCAT(apellido1, " ", apellido2), email, puesto FROM empleado
+   SELECT nombre, CONCAT(apellido1, " ", apellido2) as apellidos, email, puesto FROM empleado
    WHERE puesto != 'Representante Ventas';
    ```
 
 6. Devuelve un listado con el nombre de los todos los clientes españoles.
 
    ```SQL
-   SELECT DISTINCT nombre_cliente, pais FROM cliente WHERE pais = 'Spain';
+   SELECT DISTINCT nombre_cliente FROM cliente WHERE pais = 'Spain';
    ```
 
 7. Devuelve un listado con los distintos estados por los que puede pasar un pedido.
@@ -452,3 +452,5 @@ WHERE nombre_cliente IS NULL;
 2. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
 3. Devuelve un listado de los productos que nunca han aparecido en un pedido.
 4. Devuelve un listado de los productos que han aparecido en un pedido alguna vez.
+
+
