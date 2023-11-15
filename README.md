@@ -370,3 +370,85 @@ WHERE nombre_cliente IS NULL;
     SELECT * FROM cliente WHERE ciudad = 'Madrid'
     AND (codigo_empleado_rep_ventas = 11 OR codigo_empleado_rep_ventas = 30);
     ```
+
+### Query Nov 09
+
+### 1.4.8 Subconsultas
+
+#### 1.4.8.1 Con operadores básicos de comparación
+
+1. Devuelve el nombre del cliente con mayor límite de crédito.
+
+   ```SQL
+   select nombre_cliente, limite_credito from cliente where limite_credito = (select max(limite_credito) from cliente);
+   ```
+
+2. Devuelve el nombre del producto que tenga el precio de venta más caro.
+
+   ```SQL
+   select nombre, precio_venta from producto where precio_venta = (select max(precio_venta) from producto);
+
+   ```
+
+3. Devuelve el nombre del producto del que se han vendido más unidades. (Tenga en cuenta que tendrá que calcular cuál es el número total de unidades que se han vendido de cada producto a partir de los datos de la tabla `detalle_pedido`)
+
+   ```SQL
+   SELECT nombre FROM producto WHERE codigo_producto = (
+   SELECT codigo_producto
+   FROM detalle_pedido
+   GROUP BY codigo_producto ORDER BY SUM(cantidad) DESC LIMIT 1
+   );
+   ```
+
+4. Los clientes cuyo límite de crédito sea mayor que los pagos que haya realizado. (Sin utilizar `INNER JOIN`).
+
+   ```SQL
+   select nombre_cliente, limite_credito from cliente
+   where limite_credito > (Select MAX(total) from pago);
+   ```
+
+5. Devuelve el producto que más unidades tiene en stock.
+
+   ```SQL
+   select nombre, cantidad_en_stock from producto
+   where cantidad_en_stock = (select max(cantidad_en_stock) from producto);
+   ```
+
+6. Devuelve el producto que menos unidades tiene en stock.
+
+   ```SQL
+   select nombre, cantidad_en_stock from producto
+   where cantidad_en_stock = (select min(cantidad_en_stock) from producto);
+   ```
+
+7. Devuelve el nombre, los apellidos y el email de los empleados que están a cargo de **Alberto Soria**.
+
+   ```SQL
+
+   SELECT nombre, apellido1, apellido2, email, codigo_jefe
+   FROM empleado WHERE codigo_jefe = (SELECT e.codigo_empleado FROM empleado e
+   WHERE CONCAT(e.nombre, " " , e.apellido1) = "Alberto Soria");
+   ```
+
+#### 1.4.8.2 Subconsultas con ALL y ANY
+
+1. Devuelve el nombre del cliente con mayor límite de crédito.
+2. Devuelve el nombre del producto que tenga el precio de venta más caro.
+3. Devuelve el producto que menos unidades tiene en stock.
+
+#### 1.4.8.3 Subconsultas con IN y NOT IN
+
+1. Devuelve el nombre, apellido1 y cargo de los empleados que no representen a ningún cliente.
+2. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+3. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+4. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+5. Devuelve el nombre, apellidos, puesto y teléfono de la oficina de aquellos empleados que no sean representante de ventas de ningún cliente.
+6. Devuelve las oficinas donde **no trabajan** ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama `Frutales`.
+7. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado ningún pago.
+
+#### 1.4.8.4 Subconsultas con EXISTS y NOT EXISTS
+
+1. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+2. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+3. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+4. Devuelve un listado de los productos que han aparecido en un pedido alguna vez.
