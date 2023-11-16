@@ -433,8 +433,22 @@ WHERE nombre_cliente IS NULL;
 #### 1.4.8.2 Subconsultas con ALL y ANY
 
 1. Devuelve el nombre del cliente con mayor límite de crédito.
+   ```SQL
+   select nombre_cliente from cliente where limite_credito >= ALL(select limite_credito from cliente);
+   ```
+
 2. Devuelve el nombre del producto que tenga el precio de venta más caro.
+   ```SQL
+   select nombre from producto 
+   where precio_venta >= ALL (select precio_venta from producto);
+   ```
+
 3. Devuelve el producto que menos unidades tiene en stock.
+
+```SQL
+   select nombre from producto 
+   where cantidad_en_stock <= ALL (select cantidad_en_stock from producto);
+```
 
 #### 1.4.8.3 Subconsultas con IN y NOT IN
 
@@ -454,3 +468,5 @@ WHERE nombre_cliente IS NULL;
 4. Devuelve un listado de los productos que han aparecido en un pedido alguna vez.
 
 
+select DISTINCT nombre_cliente, limite_credito
+from cliente order by limite_credito DESC;
