@@ -693,71 +693,54 @@ Para utilizar el inner join en la modificacion de campos debemos seguir la estru
 
 1. **NEGACION CON IN (NOT IN)**
 
-Filtrar infomracion con la expresion IN pero utilizando la palabra de negacion NOT.
 
    #### Estructura:
 
-      select .. from ..
-      where ... NOT IN (...);
 
 
    #### Query con Jardineria
 
    ```SQL  
-      select codigo_empleado, nombre from empleado
-      where codigo_empleado NOT IN (2,31,17,5);
+
 
    ```
 
 2. **SUBCONSULTAS**
 
-Otra manera de usar subconsultas es de la mano con where.
+
 
    #### Estructura:
-      select atributos from table 
-      where (select COUNT(*) 
-            from table2
-            where table1.id = table2.id
-      ) > 0;
+
 
    #### Query con Jardineria
 
    ```SQL  
-      select nombre, codigo_oficina from empleado 
-      where (select COUNT(*) 
-            from oficina o
-            where o.codigo_oficina = empleado.codigo_oficina
-      ) > 0;
+
    ```
 
 3. **REGEX**
 
-   El regex se usa para verificar el dato apartiir de una secuencia.
+  
 
    #### Estructura:
-   SELECT * FROM table
-   WHERE [Name] LIKE '[A-Za-z] [A-Za-z]%'
+
 
    #### Query con Jardineria
    ```SQL  
-      SELECT nombre FROM empleado       
-      WHERE nombre RLIKE '[A-Za-z] [A-Za-z]';
+
    ```
 
 
 4. **SUBCONSULTA Y IN**
 
-   Tambien se podra mezclar una subconsulta con IN.
+
 
    #### Estructura:
 
 
    #### Query con Jardineria
    ```SQL  
-      SELECT nombre, codigo_oficina FROM empleado    
-      WHERE codigo_oficina in (
-            SELECT o.codigo_oficina FROM oficina o       
-            WHERE codigo_oficina RLIKE 'K$' );
+
    ```
 
 
@@ -768,13 +751,82 @@ Otra manera de usar subconsultas es de la mano con where.
 
    #### Estructura:
 
-SELECT atributo FROM table
-WHERE SUBSTRING (atributo, 1, 1) = 'A'
 
    #### Query con Jardineria
 
    ```SQL  
 
-SELECT nombre FROM producto
-WHERE SUBSTRING(nombre, 1, 1) = 'A';
+   ```
+
+
+       -----
+
+## 5 Tips de WHERE
+
+
+1. **NEGACION CON IN (NOT IN)**
+
+
+   #### Estructura:
+
+
+
+   #### Query con Jardineria
+
+   ```SQL  
+
+
+   ```
+
+2. **SUBCONSULTAS**
+
+
+
+   #### Estructura:
+
+
+   #### Query con Jardineria
+
+   ```SQL  
+
+   ```
+
+3. **REGEX**
+
+
+   #### Estructura:
+
+
+   #### Query con Jardineria
+   ```SQL  
+
+   ```
+
+
+4. **SUBCONSULTA Y IN**
+
+
+
+   #### Estructura:
+
+
+   #### Query con Jardineria
+   ```SQL  
+
+   ```
+
+
+5. **FUNCIONES**
+
+
+
+
+   #### Estructura:
+
+
+
+   #### Query con Jardineria
+
+   ```SQL  
+
    ```
