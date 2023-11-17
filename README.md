@@ -16,7 +16,7 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
    join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
    join pago p on c.codigo_cliente = p.codigo_cliente
    where id_transaccion is not null
-   group by c.nombre_cliente;
+   GROUP by c.nombre_cliente;
    ```
 
 3. Muestra el nombre de los clientes que no hayan realizado pagos junto con el nombre de sus representantes de ventas.
@@ -470,3 +470,216 @@ WHERE nombre_cliente IS NULL;
 
 select DISTINCT nombre_cliente, limite_credito
 from cliente order by limite_credito DESC;
+
+
+-----
+
+## 5 Tips de GROUP BY
+
+1.  **AGRUPAR POR VARIOS CAMPOS**
+
+   **GROUP BY** tiene la posibilidad de agrupar mas de dos atributos. Para ello solo debes agregar los atributos separados por coma.
+
+   #### Estructura:
+      SELECT... FROM ...
+      JOIN...
+      *GROUP BY* atributo1 , atributo2 ...
+
+   #### Query con Jardineria
+
+   ```SQL  
+      SELECT ciudad, pais FROM cliente
+      GROUP by pais ASC, ciudad;
+   ```
+
+
+2.  **FUNCIONES DE AGREGADO**
+
+   Este tip nos ayudara a no presentar el error que da mysql al querer usar funciones agregadas con where. Por ello podremos utilizar HAVING en conjunto con WHERE.
+
+   
+   #### Estructura:
+      SELECT...COUNT(..) FROM ...
+      JOIN...
+      *GROUP BY* atributo1
+      ***HAVING** COUNT(..);
+
+   #### Query con Jardineria
+
+   ```SQL  
+      SELECT gama, COUNT(*) as cantidad FROM producto
+      GROUP by gama
+      HAVING COUNT(*);
+   ```
+
+
+3.  **FUNCIONES ESCALARES**
+
+   las funciones escalares funcionan con elementos nativos(INT, VARCHAR ...). Se puede utilizar estas funciones escalares con gruop by, como LOWER, UPPER, CONCAT O SUBSTRING entre otras.
+
+   #### Estructura:
+      SELECT...funcion_escalar(..) FROM ...
+      JOIN...
+      *GROUP BY* funcion_escalar(..)
+
+   #### Query con Jardineria
+
+   ```SQL  
+      SELECT LOWER(pais)  FROM oficina
+      GROUP by LOWER(pais);
+   ```
+
+4.  **UNION ALL**
+
+   Este comando nos permite unir mas de dos tablas y mostrarlas en una sola query. 
+   *Es importante que en la union de las query se utilice la misma cantidad de columnas a mostrar.
+
+   #### Estructura:
+      SELECT... FROM ...
+      WHERE
+      **UNION ALL**
+      SELECT... FROM ...
+      WHERE ... ;
+
+   #### Query con Jardineria
+
+   ```SQL  
+      SELECT nombre FROM producto
+      UNION ALL
+      SELECT total FROM pago;
+   ```
+
+
+5.  **CONCATENAR LOS VALORES DEL RESULTADO EN UNA CELDA**
+
+   Para realizar esta funcion usaremos el comando ROLLUP, el cual se encargara de devolver el total de cada agrupamiento hecho. Es decir agrupara por cierto atributo y luego sumara los campos de cada gurpo.
+
+
+  #### Estructura:
+      SELECT ... COUNT(*) AS Total
+      FROM ...
+      JOIN...
+      GROUP BY ... **WITH ROLLUP**; 
+
+   #### Query con Jardineria
+
+   ```SQL  
+      SELECT p.nombre, p.gama, COUNT(*) AS Total
+      FROM producto p
+      JOIN gama_producto g ON p.gama = g.gama
+      GROUP BY p.gama, p.nombre WITH ROLLUP; 
+   ```
+
+
+   -----
+
+## 5 Tips de UPDATE
+
+
+1. **EDITAR APARTIR DE UN ATRIBUTO**
+
+Se puede modificar el contenido de los campos de una columna especifica ya existente. si te da error puedes desactivar el modo de actualización segura para la sesión actual ejecutando la siguiente consulta:
+
+   *SET SQL_SAFE_UPDATES = 0;*
+
+   #### Estructura:
+      UPDATE nombre_tabla SET atributo = atributo + 2;
+
+
+   #### Query con Jardineria
+
+   ```SQL  
+      UPDATE producto SET precio_venta = (precio_venta * 0.19) WHERE codigo_producto = 11679;
+   ```
+
+2. **VALOR POR DEFECTO**
+
+
+En mysql podremos utilizar el valor por defecto que se tiene ingresado. Si se olvido de agregar la modalidad de un valor por defecto cuando se creo la tabla usa el siguiente comando para anadirlo.
+
+ ``` ALTER TABLE producto MODIFY COLUMN precio_venta DECIMAL(14,00) DEFAULT 1.00; ```
+
+   #### Estructura:
+      UPDATE nombre_tabla SET atributo = atributo + DEFAULT;
+
+   #### Query con Jardineria
+
+   ```SQL  
+     UPDATE producto SET precio_venta = DEFAULT 
+     WHERE codigo_producto = 21636;
+   ```
+
+3. **MODIFICAR LOS CAMPOS CON SUBCONSULTAS**
+
+
+Otra manera de modificar los campos seleccionados es por medio de subconsultas.
+
+   #### Estructura:
+      update tabla SET 
+      atributo = ( select CONCAT(atributo1,' ', atributo2) from tabla t
+      WHERE t.id = tabla.id)
+
+   #### Query con Jardineria
+
+   ```SQL  
+      ALTER TABLE cliente ADD COLUMN nombre_completo_contacto VARCHAR(100);
+
+      update cliente SET 
+      nombre_completo_contacto = ( select CONCAT(nombre_contacto,' ', apellido_contacto) from cliente c
+      WHERE c.codigo_cliente = cliente.codigo_cliente)
+
+      select nombre_cliente, nombre_contacto, apellido_contacto, nombre_completo_contacto from cliente;
+
+   ```
+
+4. **MODIFICAR LOS CAMPOS CON SUBCONSULTAS DENTRO DE WHERE**
+
+
+Cuando utilizamos unn where para hacer un update, aqui podremos utilizar una subconsulta dentro del where, asi:
+
+   #### Estructura:
+      update tabla SET 
+      atributo = ( select CONCAT(atributo1,' ', atributo2) from tabla t
+      WHERE t.id = tabla.id)
+
+   #### Query con Jardineria
+
+   ```SQL  
+      ALTER TABLE cliente ADD COLUMN nombre_completo_contacto VARCHAR(100);
+
+      update cliente SET 
+      nombre_completo_contacto = ( select CONCAT(nombre_contacto,' ', apellido_contacto) from cliente c
+      WHERE c.codigo_cliente = cliente.codigo_cliente)
+
+      select nombre_cliente, nombre_contacto, apellido_contacto, nombre_completo_contacto from cliente;
+
+   ```
+
+5. **UPDATE CON INNER JOIN**
+
+Para utilizar el inner join en la modificacion de campos debemos seguir la estructura:
+
+   #### Estructura:
+
+
+      UPDATE tabla1
+      SET atributo_cambiar = 'valor' 
+      where tabla1.codigo_oficina in (
+      select tabla2.codigo_oficina from tabla2
+      where tabla2.ciudad LIKE 'B%'
+      );
+
+   #### Query con Jardineria
+
+   ```SQL  
+      ALTER TABLE empleado ADD COLUMN ciudad_oficina VARCHAR(100);
+
+      UPDATE empleado
+      SET ciudad_oficina = 'España' 
+      where empleado.codigo_oficina in (
+      select o.codigo_oficina from oficina o
+      where o.ciudad LIKE 'B%'
+      );
+
+      select nombre, ciudad_oficina from empleado;
+   ```
