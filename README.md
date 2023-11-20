@@ -453,6 +453,12 @@ WHERE nombre_cliente IS NULL;
 #### 1.4.8.3 Subconsultas con IN y NOT IN
 
 1. Devuelve el nombre, apellido1 y cargo de los empleados que no representen a ningún cliente.
+
+```SQL
+   SELECT e.nombre, e.apellido1, e.cargo from cliente
+   where cliente.codigo_empleado_rep_ventas not in ()
+```
+
 2. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
 3. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
 4. Devuelve un listado de los productos que nunca han aparecido en un pedido.
