@@ -455,28 +455,118 @@ WHERE nombre_cliente IS NULL;
 1. Devuelve el nombre, apellido1 y cargo de los empleados que no representen a ningún cliente.
 
 ```SQL
-   SELECT e.nombre, e.apellido1, e.cargo from cliente
-   where cliente.codigo_empleado_rep_ventas not in ()
+   SELECT e.nombre, e.apellido1, e.puesto from empleado e
+   where e.codigo_empleado not in (select codigo_empleado_rep_ventas from cliente);
 ```
 
 2. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+
+```SQL
+   SELECT c.nombre_cliente from cliente c
+   where c.codigo_cliente not in (select p.codigo_cliente from pago p);
+```
+
 3. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+
+```SQL   
+   SELECT c.nombre_cliente from cliente c
+   where c.codigo_cliente in (select p.codigo_cliente from pago p);
+ 
+```
+
 4. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+
+```SQL
+   SELECT * from producto p
+   where p.codigo_producto not in (select dp.codigo_producto from detalle_pedido dp); 
+```
+
 5. Devuelve el nombre, apellidos, puesto y teléfono de la oficina de aquellos empleados que no sean representante de ventas de ningún cliente.
+
+```SQL
+   select nombre, CONCAT(apellido1,' ',apellido2) as apellido, puesto, o.telefono
+   from empleado
+   JOIN oficina o ON empleado.codigo_oficina = o.codigo_oficina
+   where empleado.codigo_empleado not in (select codigo_empleado_rep_ventas from cliente);
+```
+
 6. Devuelve las oficinas donde **no trabajan** ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama `Frutales`.
+
+```SQL
+ SELECT DISTINCT o.*
+FROM oficina o
+WHERE o.codigo_oficina NOT IN (
+    SELECT DISTINCT e.codigo_oficina
+    FROM empleado e
+    WHERE e.codigo_empleado IN (
+        SELECT DISTINCT c.codigo_empleado_rep_ventas
+        FROM cliente c
+        WHERE c.codigo_cliente IN (
+            SELECT DISTINCT pe.codigo_cliente
+            FROM pedido pe
+            JOIN detalle_pedido dp ON pe.codigo_pedido = dp.codigo_pedido
+            JOIN producto p ON dp.codigo_producto = p.codigo_producto
+            WHERE p.gama = 'Frutales'
+        )
+    )
+);
+
+```
+
 7. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado ningún pago.
+
+```SQL
+      SELECT *
+      FROM cliente
+      WHERE cliente.codigo_cliente IN (
+         SELECT codigo_pedido
+         FROM detalle_pedido
+         WHERE codigo_pedido IS NOT NULL
+      )
+      AND cliente.codigo_cliente NOT IN (
+         SELECT codigo_cliente
+         FROM pago
+         WHERE codigo_cliente IS NOT NULL
+      );
+```
+
 
 #### 1.4.8.4 Subconsultas con EXISTS y NOT EXISTS
 
 1. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+
+```SQL
+      select c.* from cliente c
+      where not exists (
+         select codigo_cliente from pago p
+         where c.codigo_cliente = p.codigo_cliente
+);
+```
 2. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+  
+   ```SQL
+      select c.* from cliente c
+      where exists (
+         select codigo_cliente from pago p
+         where c.codigo_cliente = p.codigo_cliente);
+   ```
 3. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+   
+   ```SQL
+   select * from producto p
+   where not exists (
+      select codigo_producto from detalle_pedido dp
+      where p.codigo_producto = dp.codigo_producto);
+
+   ```
 4. Devuelve un listado de los productos que han aparecido en un pedido alguna vez.
-
-
-select DISTINCT nombre_cliente, limite_credito
-from cliente order by limite_credito DESC;
-
+   
+   ```SQL
+   select * from producto p
+   where exists (
+      select codigo_producto from detalle_pedido dp
+      where p.codigo_producto = dp.codigo_producto);
+   ```
 
 -----
 
@@ -693,6 +783,61 @@ Para utilizar el inner join en la modificacion de campos debemos seguir la estru
     -----
 
 
+
+## 5 TIPS CON SELECT
+
+### Valores Fijos
+
+```sql
+DROP TABLE IF EXISTS tmp_table_empleado_cliente;
+
+CREATE TABLE IF NOT EXISTS tmp_table_empleado_cliente(
+    nombreEmpleado varchar(100),
+    nombreCliente varchar(100)
+);
+
+INSERT INTO tmp_table_empleado_cliente
+SELECT CONCAT(nombre, " ", apellido1), nombre_cliente FROM empleado em, cliente cl
+WHERE cl.codigo_empleado_rep_ventas = em.codigo_empleado
+AND codigo_cliente < 10;
+
+SELECT * FROM tmp_table_empleado_cliente;
+```
+
+### Operaciones con columnas
+
+```sql
+select codigo_oficina, CONCAT(ciudad, ' - ', region) as Ubicacion from oficina;
+```
+
+### Condiciones
+
+```sql
+select nombre_cliente, limite_credito, 
+CASE WHEN limite_credito > 20000 THEN "Credito Alto" ELSE "Credito Bajo" END as NivelCredito
+FROM cliente;
+```
+
+### Subconsultas
+
+```sql
+SELECT gama, (SELECT count(*) FROM producto WHERE gama_producto.gama = producto.gama) as CantidadProductos FROM gama_producto;
+```
+
+### Consulta sobre Subconsulta
+
+```sql
+SELECT codigo_producto, proveedor, cantidad
+FROM (
+    SELECT codigo_producto, proveedor, cantidad_en_stock as cantidad
+    FROM producto
+    WHERE cantidad_en_stock < 100
+) AS subconsulta
+WHERE cantidad > 5 AND cantidad < 50;
+```
+
+
+
 ## 5 Tips de WHERE
 
 
@@ -781,56 +926,3 @@ SELECT nombre FROM producto
 WHERE SUBSTRING(nombre, 1, 1) = 'A';
    ```
 
-
-
-## 5 TIPS CON SELECT
-
-### Valores Fijos
-
-```sql
-DROP TABLE IF EXISTS tmp_table_empleado_cliente;
-
-CREATE TABLE IF NOT EXISTS tmp_table_empleado_cliente(
-    nombreEmpleado varchar(100),
-    nombreCliente varchar(100)
-);
-
-INSERT INTO tmp_table_empleado_cliente
-SELECT CONCAT(nombre, " ", apellido1), nombre_cliente FROM empleado em, cliente cl
-WHERE cl.codigo_empleado_rep_ventas = em.codigo_empleado
-AND codigo_cliente < 10;
-
-SELECT * FROM tmp_table_empleado_cliente;
-```
-
-### Operaciones con columnas
-
-```sql
-select codigo_oficina, CONCAT(ciudad, ' - ', region) as Ubicacion from oficina;
-```
-
-### Condiciones
-
-```sql
-select nombre_cliente, limite_credito, 
-CASE WHEN limite_credito > 20000 THEN "Credito Alto" ELSE "Credito Bajo" END as NivelCredito
-FROM cliente;
-```
-
-### Subconsultas
-
-```sql
-SELECT gama, (SELECT count(*) FROM producto WHERE gama_producto.gama = producto.gama) as CantidadProductos FROM gama_producto;
-```
-
-### Consulta sobre Subconsulta
-
-```sql
-SELECT codigo_producto, proveedor, cantidad
-FROM (
-    SELECT codigo_producto, proveedor, cantidad_en_stock as cantidad
-    FROM producto
-    WHERE cantidad_en_stock < 100
-) AS subconsulta
-WHERE cantidad > 5 AND cantidad < 50;
-```
