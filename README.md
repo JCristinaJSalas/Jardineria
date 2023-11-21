@@ -48,7 +48,7 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
    join pago p on c.codigo_cliente = p.codigo_cliente
    join oficina o on e.codigo_oficina = o.codigo_oficina
    where id_transaccion is null
-   group by c.nombre_cliente;
+   group by c.codigo_cliente;
    ```
 
 6. Lista la dirección de las oficinas que tengan clientes en `Fuenlabrada`.
@@ -69,7 +69,7 @@ Resuelva todas las consultas utilizando la sintaxis de `SQL1` y `SQL2`. Las cons
    join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado
    join pago p on c.codigo_cliente = p.codigo_cliente
    join oficina o on e.codigo_oficina = o.codigo_oficina
-   group by c.nombre_cliente;
+   group by c.codigo_cliente;
    ```
 
 8. Devuelve un listado con el nombre de los empleados junto con el nombre de sus jefes.
