@@ -786,46 +786,89 @@ Para utilizar el inner join en la modificacion de campos debemos seguir la estru
 
 ## 5 TIPS CON SELECT
 
-### Valores Fijos
+1. **Valores Fijos**
 
-```sql
-DROP TABLE IF EXISTS tmp_table_empleado_cliente;
 
-CREATE TABLE IF NOT EXISTS tmp_table_empleado_cliente(
-    nombreEmpleado varchar(100),
-    nombreCliente varchar(100)
-);
+   #### Estructura:
 
-INSERT INTO tmp_table_empleado_cliente
-SELECT CONCAT(nombre, " ", apellido1), nombre_cliente FROM empleado em, cliente cl
-WHERE cl.codigo_empleado_rep_ventas = em.codigo_empleado
-AND codigo_cliente < 10;
+      INSERT INTO tabla
+      SELECT atributos FROM tabla1, tabla2
+      WHERE condiciones;
 
-SELECT * FROM tmp_table_empleado_cliente;
-```
+   #### Query con Jardineria
+   
+      ```sql
+      CREATE TABLE IF NOT EXISTS table_empleado_cliente(
+      nombreEmpleado varchar(100),
+      nombreCliente varchar(100)
+      );
+      
+      INSERT INTO table_empleado_cliente
+      SELECT CONCAT(nombre, " ", apellido1), nombre_cliente FROM empleado em, cliente cl
+      WHERE cl.codigo_empleado_rep_ventas = em.codigo_empleado
+      AND codigo_cliente < 8;
+      
+      SELECT * FROM table_empleado_cliente;
+      ```
 
-### Operaciones con columnas
+2. **Operaciones con columnas**
 
-```sql
-select codigo_oficina, CONCAT(ciudad, ' - ', region) as Ubicacion from oficina;
-```
 
-### Condiciones
+   #### Estructura:
 
-```sql
-select nombre_cliente, limite_credito, 
-CASE WHEN limite_credito > 20000 THEN "Credito Alto" ELSE "Credito Bajo" END as NivelCredito
-FROM cliente;
-```
+      select atributos_columnas as subnombre from tabla;
 
-### Subconsultas
+   #### Query con Jardineria  
+      ```sql
+      select codigo_oficina, CONCAT(' - ', region) as Ubicacion from oficina;
+      ```
 
-```sql
-SELECT gama, (SELECT count(*) FROM producto WHERE gama_producto.gama = producto.gama) as CantidadProductos FROM gama_producto;
-```
 
-### Consulta sobre Subconsulta
+3. **Condiciones**
 
+   #### Estructura:
+
+      select atributos...
+      CASE WHEN condicion THEN mensaje1 ELSE mensaje2 END as subnombre
+      FROM tabla;
+
+   #### Query con Jardineria  
+
+      ```sql
+      select nombre_cliente, limite_credito, 
+      CASE WHEN limite_credito > 20000 THEN "Credito Alto" ELSE "Credito Bajo" END as NivelCredito
+      FROM cliente;
+      ```
+
+
+
+4. **Subconsultas**
+
+   #### Estructura:
+
+      SELECT atributos (subconsulta) as subnombre FROM tabla;
+
+   #### Query con Jardineria  
+   
+      ```sql
+      SELECT gama, (SELECT count(*) FROM producto WHERE gama_producto.gama = producto.gama) as CantidadProductos FROM gama_producto;
+      ```
+
+5. **Consulta sobre Subconsulta**
+
+
+   #### Estructura:
+
+      SELECT atributos...
+      FROM (
+          Ssubconsulta
+      ) AS subconsulta
+      WHERE condiciones;
+
+
+   #### Query con Jardineria
+
+   
 ```sql
 SELECT codigo_producto, proveedor, cantidad
 FROM (
